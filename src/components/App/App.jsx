@@ -1,11 +1,18 @@
 import './App.css';
 import Header from '../Header/Header';
+import DropDownModal from '../DropDownModal/DropDownModal';
 import React, {useEffect, useMemo, useState} from 'react';
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 
 function App() {
    const [init, setInit] = useState(false);
+   const [activeModal, setActiveModal] = useState('')
+   
+   const closeModal = () => {
+    setActiveModal('');
+   }
+
    useEffect(() => {
     initParticlesEngine(async (engine) => {
       await loadSlim(engine);
@@ -13,6 +20,23 @@ function App() {
       setInit(true);
     });
   }, []);
+
+  useEffect(() => {
+
+    if (!activeModal) return; 
+
+    const handleEscClose = (e) => { 
+      if (e.key === "Escape") {
+        closeModal();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscClose);
+
+    return () => { 
+      document.removeEventListener("keydown", handleEscClose);
+    };
+  }, [activeModal]);
 
   const particlesLoaded = (container) => {
     console.log("Particles Loaded:", container);
@@ -75,13 +99,16 @@ function App() {
 
   return (
     <div className="page">
-     <Header />
+     <Header closeModal={closeModal} />
      {init && (
         <Particles
           id="tsparticles"
           options={options}
           particlesLoaded={particlesLoaded}
         />
+      )}
+      {activeModal === 'dropdown' && (
+        <DropDownModal />
       )}
     </div>
   );
